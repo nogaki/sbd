@@ -35,11 +35,9 @@ namespace sbd {
       zero = ElemT(0.0);
       if(!((i%2 == j%2)&&(k%2==l%2))) return zero;
       int I = i/2; int J = j/2; int K = k/2; int L=l/2;
-      int ij = std::max(I,J)*(std::max(I,J)+1)/2 + std::min(I,J);
-      int kl = std::max(K,L)*(std::max(K,L)+1)/2 + std::min(K,L);
-      int a = std::max(ij,kl);
-      int b = std::min(ij,kl);
-      return store[a*(a+1)/2+b];
+      int ij = I*norbs+J;
+      int kl = K*norbs+L;
+      return store[ij*norbs*norbs + kl];
     }
     inline ElemT & Direct(int i, int j) {
       return DirectMat[i+norbs*j];
@@ -51,11 +49,9 @@ namespace sbd {
     inline ElemT Value(int i, int j, int k, int l) const {
       if(!((i%2 == j%2)&&(k%2==l%2))) return zero;
       int I = i/2; int J = j/2; int K = k/2; int L=l/2;
-      int ij = std::max(I,J)*(std::max(I,J)+1)/2 + std::min(I,J);
-      int kl = std::max(K,L)*(std::max(K,L)+1)/2 + std::min(K,L);
-      int a = std::max(ij,kl);
-      int b = std::min(ij,kl);
-      return store[a*(a+1)/2+b];
+      int ij = I*norbs+J;
+      int kl = K*norbs+L;
+      return store[ij*norbs*norbs + kl];
     }
     inline ElemT DirectValue(int i, int j) const {
       return DirectMat[i+norbs*j];

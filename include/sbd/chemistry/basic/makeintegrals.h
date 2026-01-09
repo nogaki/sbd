@@ -29,7 +29,7 @@ namespace sbd {
 
     int B = L*(L+1)/2;
     I2.norbs = L;
-    I2.store.resize(B*(B+1)/2,ElemT(0.0));
+    I2.store.resize(std::pow(L,4),ElemT(0.0));
 
     for(const auto & [value, i, j, k, l] : fcidump.integrals) {
       if( (i==0) && (k==0) && (j==0) && (l==0) ) {
@@ -41,7 +41,7 @@ namespace sbd {
 	I1(2*(j-1)+1,2*(i-1)+1) = ElemT(value);
       } else {
 	I2(2*(i-1),2*(j-1),2*(k-1),2*(l-1)) = ElemT(value);
-      }
+        }
     }
 
     I2.DirectMat.resize(L*L);
