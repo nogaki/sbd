@@ -172,7 +172,6 @@ namespace sbd {
       size_t ia_end   = braAlphaEnd;
 
       auto DetI = DetFromAlphaBeta(adets[0],bdets[0],bit_length,norbs);
-      auto DetJ = DetI;
       std::vector<int> c(2,0);
       std::vector<int> d(2,0);
 
@@ -202,9 +201,12 @@ namespace sbd {
 		  size_t jb = helper[task].SinglesFromBetaSM[ib-helper[task].braBetaStart][k];
 		  size_t ketIdx = (ja-helper[task].ketAlphaStart)*ketBetaSize
 		                  +jb-helper[task].ketBetaStart;
-		  DetFromAlphaBeta(adets[ja],bdets[jb],bit_length,norbs,DetJ);
-		  size_t orbDiff;
-		  ElemT eij = Hij(DetI,DetJ,bit_length,norbs,c,d,I0,I1,I2,orbDiff);
+		  ElemT eij = TwoExcite(DetI,bit_length,
+					helper[task].SinglesAlphaCrAnSM[ia-helper[task].braAlphaStart][2*j+0],
+					helper[task].SinglesBetaCrAnSM[ib-helper[task].braBetaStart][2*k+0],
+					helper[task].SinglesAlphaCrAnSM[ia-helper[task].braAlphaStart][2*j+1],
+					helper[task].SinglesBetaCrAnSM[ib-helper[task].braBetaStart][2*k+1],
+					I1,I2);
 		  ih[task][thread_id][address] = braIdx;
 		  jh[task][thread_id][address] = ketIdx;
 		  hij[task][thread_id][address] = eij;
@@ -220,10 +222,10 @@ namespace sbd {
 		size_t ja = helper[task].SinglesFromAlphaSM[ia-helper[task].braAlphaStart][j];
 		size_t ketIdx = (ja-helper[task].ketAlphaStart)*ketBetaSize
 		                +ib-helper[task].ketBetaStart;
-		DetFromAlphaBeta(adets[ja],bdets[ib],bit_length,norbs,DetJ);
-		size_t orbDiff;
-		ElemT eij = Hij(DetI,DetJ,
-				bit_length,norbs,c,d,I0,I1,I2,orbDiff);
+		ElemT eij = OneExcite(DetI,bit_length,
+				      helper[task].SinglesAlphaCrAnSM[ia-helper[task].braAlphaStart][2*j+0],
+				      helper[task].SinglesAlphaCrAnSM[ia-helper[task].braAlphaStart][2*j+1],
+				      I1,I2);
 		ih[task][thread_id][address] = braIdx;
 		jh[task][thread_id][address] = ketIdx;
 		hij[task][thread_id][address] = eij;
@@ -234,9 +236,12 @@ namespace sbd {
 		size_t ja = helper[task].DoublesFromAlphaSM[ia-helper[task].braAlphaStart][j];
 		size_t ketIdx = (ja-helper[task].ketAlphaStart)*ketBetaSize
 		               + ib-helper[task].ketBetaStart;
-		DetFromAlphaBeta(adets[ja],bdets[ib],bit_length,norbs,DetJ);
-		size_t orbDiff;
-		ElemT eij = Hij(DetI,DetJ,bit_length,norbs,c,d,I0,I1,I2,orbDiff);
+		ElemT eij = TwoExcite(DetI,bit_length,
+				      helper[task].DoublesAlphaCrAnSM[ia-helper[task].braAlphaStart][4*j+0],
+				      helper[task].DoublesAlphaCrAnSM[ia-helper[task].braAlphaStart][4*j+1],
+				      helper[task].DoublesAlphaCrAnSM[ia-helper[task].braAlphaStart][4*j+2],
+				      helper[task].DoublesAlphaCrAnSM[ia-helper[task].braAlphaStart][4*j+3],
+				      I1,I2);
 		ih[task][thread_id][address] = braIdx;
 		jh[task][thread_id][address] = ketIdx;
 		hij[task][thread_id][address] = eij;
@@ -250,9 +255,10 @@ namespace sbd {
 		size_t jb = helper[task].SinglesFromBetaSM[ib-helper[task].braBetaStart][j];
 		size_t ketIdx = (ia-helper[task].ketAlphaStart) * ketBetaSize
 		               + jb - helper[task].ketBetaStart;
-		DetFromAlphaBeta(adets[ia],bdets[jb],bit_length,norbs,DetJ);
-		size_t orbDiff;
-		ElemT eij = Hij(DetI,DetJ,bit_length,norbs,c,d,I0,I1,I2,orbDiff);
+		ElemT eij = OneExcite(DetI,bit_length,
+				      helper[task].SinglesBetaCrAnSM[ib-helper[task].braBetaStart][2*j+0],
+				      helper[task].SinglesBetaCrAnSM[ib-helper[task].braBetaStart][2*j+1],
+				      I1,I2);
 		ih[task][thread_id][address] = braIdx;
 		jh[task][thread_id][address] = ketIdx;
 		hij[task][thread_id][address] = eij;
@@ -263,9 +269,12 @@ namespace sbd {
 		size_t jb = helper[task].DoublesFromBetaSM[ib-helper[task].braBetaStart][j];
 		size_t ketIdx = (ia-helper[task].ketAlphaStart) * ketBetaSize
 		               + jb-helper[task].ketBetaStart;
-		DetFromAlphaBeta(adets[ia],bdets[jb],bit_length,norbs,DetJ);
-		size_t orbDiff;
-		ElemT eij = Hij(DetI,DetJ,bit_length,norbs,c,d,I0,I1,I2,orbDiff);
+		ElemT eij = TwoExcite(DetI,bit_length,
+				      helper[task].DoublesBetaCrAnSM[ib-helper[task].braBetaStart][4*j+0],
+				      helper[task].DoublesBetaCrAnSM[ib-helper[task].braBetaStart][4*j+1],
+				      helper[task].DoublesBetaCrAnSM[ib-helper[task].braBetaStart][4*j+2],
+				      helper[task].DoublesBetaCrAnSM[ib-helper[task].braBetaStart][4*j+3],
+				      I1,I2);
 		ih[task][thread_id][address] = braIdx;
 		jh[task][thread_id][address] = ketIdx;
 		hij[task][thread_id][address] = eij;
