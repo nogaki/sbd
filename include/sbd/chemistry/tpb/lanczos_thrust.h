@@ -1,9 +1,9 @@
 /**
-@file sbd/chemistry/basic/lanzcos_thrust.h
+@file sbd/chemistry/tpb/lanzcos_thrust.h
 @brief lanczos for parallel task management for distributed basis
 */
-#ifndef SBD_CHEMISTRY_LANCZOS_THRUST_H
-#define SBD_CHEMISTRY_LANCZOS_THRUST_H
+#ifndef SBD_CHEMISTRY_TPB_LANCZOS_THRUST_H
+#define SBD_CHEMISTRY_TPB_LANCZOS_THRUST_H
 
 
 
@@ -21,7 +21,12 @@ namespace sbd
 template <typename ElemT, typename RealT>
 void Lanczos(const std::vector<ElemT> &hii,
 				std::vector<ElemT> &W,
-				MultBase<ElemT>& mult,
+                MultDataThrust<ElemT>& data,
+				const size_t adet_comm_size,
+				const size_t bdet_comm_size,
+				MPI_Comm h_comm,
+				MPI_Comm b_comm,
+				MPI_Comm t_comm,
 				int max_iteration,
 				int num_block,
 				RealT eps)
@@ -31,17 +36,17 @@ void Lanczos(const std::vector<ElemT> &hii,
 	int lda = num_block;
 	MPI_Datatype DataE = GetMpiType<RealT>::MpiT;
 	int mpi_rank_h;
-	MPI_Comm_rank(mult.h_comm(), &mpi_rank_h);
+	MPI_Comm_rank(h_comm, &mpi_rank_h);
 	int mpi_size_h;
-	MPI_Comm_size(mult.h_comm(), &mpi_size_h);
+	MPI_Comm_size(h_comm, &mpi_size_h);
 	int mpi_rank_b;
-	MPI_Comm_rank(mult.b_comm(), &mpi_rank_b);
+	MPI_Comm_rank(b_comm, &mpi_rank_b);
 	int mpi_size_b;
-	MPI_Comm_size(mult.b_comm(), &mpi_size_b);
+	MPI_Comm_size(b_comm, &mpi_size_b);
 	int mpi_rank_t;
-	MPI_Comm_rank(mult.t_comm(), &mpi_rank_t);
+	MPI_Comm_rank(t_comm, &mpi_rank_t);
 	int mpi_size_t;
-	MPI_Comm_size(mult.t_comm(), &mpi_size_t);
+	MPI_Comm_size(t_comm, &mpi_size_t);
 
 	RealT *A = (RealT *)calloc(num_block * num_block, sizeof(RealT));
 	RealT *U = (RealT *)calloc(num_block * num_block, sizeof(RealT));
@@ -81,9 +86,11 @@ void Lanczos(const std::vector<ElemT> &hii,
 			int ii = ib + lda * ib;
 			int ij = ib + lda * (ib + 1);
 			int ji = ib + 1 + lda * ib;
-			mult.run(hii_dev, C[ib], HC);
+			mult(hii_dev, C[ib], HC, data,
+					adet_comm_size, bdet_comm_size,
+					h_comm, b_comm, t_comm);
 
-			InnerProduct(C[ib], HC, Aii, mult.b_comm());
+			InnerProduct(C[ib], HC, Aii, b_comm);
 			A[ii] = GetReal(Aii);
 			for (int i = 0; i < n; i++) {
 				for (int j = 0; j < n; j++) {
@@ -107,7 +114,7 @@ void Lanczos(const std::vector<ElemT> &hii,
 			// C[ib + 1][is] = HC[is];
 			C[ib + 1] = HC;
 
-			Normalize(C[ib + 1], A[ij], mult.b_comm());
+			Normalize(C[ib + 1], A[ij], b_comm);
 			A[ji] = A[ij];
 
 			if ((mpi_rank_h == 0) &&
@@ -131,8 +138,8 @@ void Lanczos(const std::vector<ElemT> &hii,
 			// HC[is] = -A[ij] * volp * C[ib][is];
             thrust::transform(thrust::device, C[ib].begin(), C[ib].end(), HC.begin(), AX_kernel<ElemT>(-A[ij] * volp));
 
-			MpiAllreduce(HC, MPI_SUM, mult.t_comm());
-			MpiAllreduce(HC, MPI_SUM, mult.h_comm());
+			MpiAllreduce(HC, MPI_SUM, t_comm);
+			MpiAllreduce(HC, MPI_SUM, h_comm);
 
 			// HC[is] *= volp;
 			thrust::transform(thrust::device, HC.begin(), HC.end(), HC.begin(), AX_kernel<ElemT>(volp));

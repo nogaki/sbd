@@ -91,17 +91,10 @@ namespace sbd {
 	std::vector<size_t> index_not_found;
 	index_not_found.reserve(load_basis_size);
 	for(size_t i=0; i < load_basis_size; i++) {
-	  /*
 	  auto itn = std::lower_bound(basis.begin(),basis.end(),load_basis[i],
 				      [](const std::vector<size_t> & x,
 					 const std::vector<size_t> & y) {
 					return x < y;
-				      });
-	  */
-	  auto itn = std::lower_bound(basis.begin(),basis.end(),load_basis[i],
-				      [](const std::vector<size_t> & x,
-					 const std::vector<size_t> & y) {
-					return sbd::less_from_back(x,y);
 				      });
 	  if( itn == basis.end() || *itn != load_basis[i] ) {
 	    index_not_found.push_back(i);
@@ -123,17 +116,10 @@ namespace sbd {
 	  index_not_found.resize(0);
 	  index_not_found.reserve(load_basis.size());
 	  for(size_t i=0; i < load_basis.size(); i++) {
-	    /*
 	    auto itn = std::lower_bound(basis.begin(),basis.end(),load_basis[i],
 					[](const std::vector<size_t> & x,
 					   const std::vector<size_t> & y) {
 					  return x < y;
-					});
-	    */
-	    auto itn = std::lower_bound(basis.begin(),basis.end(),load_basis[i],
-					[](const std::vector<size_t> & x,
-					   const std::vector<size_t> & y) {
-					  return sbd::less_from_back(x,y);
 					});
 	    if( itn == basis.end() || *itn != load_basis[i] ) {
 	      index_not_found.push_back(i);
@@ -149,14 +135,11 @@ namespace sbd {
 	    send_w[k] = load_w[index_not_found[k]];
 	  }
 	}
-	ElemT normw;
-	Normalize(w,normw,b_comm);
       }
       MpiBcast(w,0,t_comm);
     }
     MpiBcast(w,0,h_comm);
   }
-  
   
 }
 

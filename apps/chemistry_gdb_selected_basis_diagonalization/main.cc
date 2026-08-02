@@ -147,7 +147,6 @@ int main(int argc, char * argv[]) {
   if( mpi_rank_h == 0 ) {
     if( mpi_rank_t == 0 ) {
       sbd::load_basis_from_files(detfiles,det,bit_length,2*L,b_comm);
-      sbd::sort_bitarray(det);
       if( sbd_data.do_sort_det ) {
 	sbd::redistribution(det,bit_length,2*L,b_comm);
 	sbd::reordering(det,bit_length,2*L,b_comm);
@@ -229,15 +228,13 @@ int main(int argc, char * argv[]) {
   }
   if( one_p_rdm.size() != 0 ) {
     if ( mpi_rank == 0 ) {
-      double zerobody = 0.0;
       double onebody = 0.0;
       double twobody = 0.0;
       double I0;
       sbd::oneInt<double> I1;
       sbd::twoInt<double> I2;
       sbd::SetupIntegrals(fcidump,L,N,I0,I1,I2);
-      zerobody = I0;
-
+      
       auto time_start_dump = std::chrono::high_resolution_clock::now();
       std::ofstream ofs_one("1pRDM.txt");
       ofs_one.precision(16);
@@ -281,15 +278,11 @@ int main(int argc, char * argv[]) {
 		<< " sbd: elapse time for dumping two-particle rdm = "
 		<< elapsed_dump << std::endl;
       std::cout << " " << sbd::make_timestamp()
-		<< " sbd: zero-body energy = " << zerobody << std::endl;
-      std::cout << " " << sbd::make_timestamp()
 		<< " sbd: one-body energy = " << onebody << std::endl;
       std::cout << " " << sbd::make_timestamp()
 		<< " sbd: two-body energy = " << twobody << std::endl;
       std::cout << " " << sbd::make_timestamp()
 		<< " sbd: one-body + two-body energy = " << onebody + twobody << std::endl;
-      std::cout << " " << sbd::make_timestamp()
-		<< " sbd: zero-body + one-body + two-body energy = " << zerobody + onebody + twobody << std::endl;
     }
   }
   /**
