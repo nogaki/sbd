@@ -129,6 +129,7 @@ namespace sbd {
 	  HC[is] = - A[ij] * C[ib][is];
 	}
       }
+
       for(int i=0; i < n; i++) {
 	for(int j=0; j < n; j++) {
 	  U[i+lda*j] = A[i+lda*j];
